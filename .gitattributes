@@ -1,0 +1,3 @@
+* text=auto
+# 保留用户规则的原始字节，确保 Git 中与发行包中的规则一致。
+rules/*.md -text

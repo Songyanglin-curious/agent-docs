@@ -1,0 +1,5 @@
+- insert:
+    - id: agent-docs
+      name: dsh-agent-docs
+      config:
+        enabled: true

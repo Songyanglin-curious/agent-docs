@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.test-output/
+docs/evidence/*
+!docs/evidence/index.md
+plugins/*/defaults/
+plugins/*/docs/
+plugins/*/README.md
+plugins/dsh-agent-docs/lib/
+plugins/codex-agent-docs/scripts/rules.mjs
