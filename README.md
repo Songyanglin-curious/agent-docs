@@ -11,3 +11,11 @@
 开发：Node.js 22+，`npm run build`、`npm test`、`npm run pack`。无需下载构建依赖。DSH 使用宿主已有的 peer 服务；离线包不包含整个 DSH 运行环境。
 
 详细说明见源码仓库 [文档入口](docs/index.md)。发行包中的 `安装与测试.md` 提供安装命令、桌面版 Hook 审阅和验收步骤。
+
+DSH Web 后续从 GitHub Release 的固定版本安装包安装：
+
+```powershell
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.2/dsh-agent-docs-0.1.2.tgz'
+```
+
+安装后重启对应 DSH Web 实例。跨机器完整安装包见 [v0.1.2 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.2)。
