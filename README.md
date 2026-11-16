@@ -58,3 +58,7 @@ codex plugin list --marketplace personal-local --json
 ## 下载和本地打包
 
 完整安装包、独立 DSH/Codex 包及校验和见 [v0.1.4 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.4)。执行 `npm run pack` 会在 `dist/` 和项目根目录同时生成当前版本安装包；包文件均由 Git 忽略，通过 GitHub Release 分发。
+
+## 本机安装验证（2026-11-16）
+
+已按上述 GitHub 命令安装 0.1.4：DSH web 的依赖指向固定 Release URL，Codex 回读为 `version=0.1.4`、`installed=true`、`enabled=true`。已安装 DSH 包的真实 Cordis 工具与生命周期测试通过，已安装 Codex Hook 的子进程验证首次提醒、续接放行通过。两端包内四份规则与源码哈希一致。全量测试 12 项通过、1 项原有模型闭环用例跳过。重启 DSH Web 和 Codex 桌面应用后使用新版；桌面正常聊天的自动维护闭环仍需验收。
