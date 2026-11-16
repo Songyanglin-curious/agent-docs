@@ -16,12 +16,12 @@
 
 ## 从 GitHub 安装 DSH Web
 
-以下 GitHub 示例仍指向已发布的 0.1.4；本轮 0.1.5 仅本地打包，尚未发布或安装，本地使用方式见“下载和本地打包”。
+以下命令使用 v0.1.5 Release 安装包；本轮发布不自动更新本机插件或已有用户规则。
 
 需要 Node.js 22+、已安装的 DSH 和可联网的 PowerShell。在 PowerShell 执行：
 
 ```powershell
-dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.4/dsh-agent-docs-0.1.4.tgz'
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.5/dsh-agent-docs-0.1.5.tgz'
 ```
 
 安装后重启对应 DSH Web 实例；Profile 不是 web 时替换名称。不要添加 `--offline`。插件工具应包含 `agent_docs_rules`。初始化时明确说“用 Agent Docs 初始化当前项目 Docs”。
@@ -31,7 +31,7 @@ dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/
 在 PowerShell 下载固定版本 ZIP，验证 GitHub 校验和，解压并运行登记脚本：
 
 ```powershell
-$version = '0.1.4'
+$version = '0.1.5'
 $base = "https://github.com/Songyanglin-curious/agent-docs/releases/download/v$version"
 $download = Join-Path $env:TEMP ('agent-docs-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $download | Out-Null
@@ -61,7 +61,7 @@ codex plugin list --marketplace personal-local --json
 
 ## 下载和本地打包
 
-已发布旧版见 [v0.1.4 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.4)。当前本地版本为 **0.1.5**，执行 `npm run pack` 在 `dist/` 和项目根目录同时生成 `agent-docs-0.1.5-安装包.zip`、`dsh-agent-docs-0.1.5.tgz`、`codex-agent-docs-0.1.5.zip` 与 `SHA256SUMS.txt`，包文件均由 Git 忽略。
+当前版本发布页见 [v0.1.5 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.5)。当前本地版本为 **0.1.5**，执行 `npm run pack` 在 `dist/` 和项目根目录同时生成 `agent-docs-0.1.5-安装包.zip`、`dsh-agent-docs-0.1.5.tgz`、`codex-agent-docs-0.1.5.zip` 与 `SHA256SUMS.txt`，包文件均由 Git 忽略。
 
 本地 DSH 安装示例（本轮未执行）：
 
