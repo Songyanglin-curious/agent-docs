@@ -17,7 +17,7 @@
 需要 Node.js 22+、已安装的 DSH 和可联网的 PowerShell。在 PowerShell 执行：
 
 ```powershell
-dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.3/dsh-agent-docs-0.1.3.tgz'
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.4/dsh-agent-docs-0.1.4.tgz'
 ```
 
 安装后重启对应 DSH Web 实例；Profile 不是 web 时替换名称。不要添加 `--offline`。插件工具应包含 `agent_docs_rules`。初始化时明确说“用 Agent Docs 初始化当前项目 Docs”。
@@ -27,7 +27,7 @@ dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/
 在 PowerShell 下载固定版本 ZIP，验证 GitHub 校验和，解压并运行登记脚本：
 
 ```powershell
-$version = '0.1.3'
+$version = '0.1.4'
 $base = "https://github.com/Songyanglin-curious/agent-docs/releases/download/v$version"
 $download = Join-Path $env:TEMP ('agent-docs-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $download | Out-Null
@@ -57,4 +57,4 @@ codex plugin list --marketplace personal-local --json
 
 ## 下载和本地打包
 
-完整安装包、独立 DSH/Codex 包及校验和见 [v0.1.3 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.3)。执行 `npm run pack` 会在 `dist/` 和项目根目录同时生成当前版本安装包；包文件均由 Git 忽略，通过 GitHub Release 分发。
+完整安装包、独立 DSH/Codex 包及校验和见 [v0.1.4 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.4)。执行 `npm run pack` 会在 `dist/` 和项目根目录同时生成当前版本安装包；包文件均由 Git 忽略，通过 GitHub Release 分发。
