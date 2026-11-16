@@ -1,6 +1,6 @@
 {
   "name": "dsh-agent-docs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "在 DSH 原 Agent 轮次结束时检查项目 Docs，提供显式初始化入口和可编辑规则",
   "type": "module",
   "main": "./lib/index.mjs",

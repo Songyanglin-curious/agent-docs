@@ -45,6 +45,8 @@ function pack() {
   for (const file of [...files, 'SHA256SUMS.txt', '安装与测试.md', '开发与验证.md']) cpSync(join(dist, file), join(transfer, file));
   cpSync(join(root, 'rules'), join(transfer, 'rules'), { recursive: true });
   run('pwsh.exe', ['-NoProfile', '-File', join(root, 'scripts/zip.ps1'), '-Source', transfer, '-Destination', join(dist, `agent-docs-${version}-安装包.zip`)]);
+  // 根目录同时提供当前版本安装包，便于直接复制到其他机器。
+  for (const file of [...files, 'SHA256SUMS.txt', `agent-docs-${version}-安装包.zip`]) cpSync(join(dist, file), join(root, file));
   console.log(files.map(file => join(dist, file)).join('\n'));
 }
 pack();

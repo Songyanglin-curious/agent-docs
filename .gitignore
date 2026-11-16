@@ -9,6 +9,10 @@ Thumbs.db
 .idea/
 .vscode/
 dist/
+/agent-docs-*-安装包.zip
+/codex-agent-docs-*.zip
+/dsh-agent-docs-*.tgz
+/SHA256SUMS.txt
 .test-output/
 docs/evidence/*
 !docs/evidence/index.md

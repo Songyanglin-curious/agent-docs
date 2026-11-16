@@ -12,10 +12,49 @@
 
 详细说明见源码仓库 [文档入口](docs/index.md)。发行包中的 `安装与测试.md` 提供安装命令、桌面版 Hook 审阅和验收步骤。
 
-DSH Web 后续从 GitHub Release 的固定版本安装包安装：
+## 从 GitHub 安装 DSH Web
+
+需要 Node.js 22+、已安装的 DSH 和可联网的 PowerShell。在 PowerShell 执行：
 
 ```powershell
-dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.2/dsh-agent-docs-0.1.2.tgz'
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.3/dsh-agent-docs-0.1.3.tgz'
 ```
 
-安装后重启对应 DSH Web 实例。跨机器完整安装包见 [v0.1.2 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.2)。
+安装后重启对应 DSH Web 实例；Profile 不是 web 时替换名称。不要添加 `--offline`。插件工具应包含 `agent_docs_rules`。初始化时明确说“用 Agent Docs 初始化当前项目 Docs”。
+
+## 从 GitHub 安装 Codex 桌面插件
+
+在 PowerShell 下载固定版本 ZIP，验证 GitHub 校验和，解压并运行登记脚本：
+
+```powershell
+$version = '0.1.3'
+$base = "https://github.com/Songyanglin-curious/agent-docs/releases/download/v$version"
+$download = Join-Path $env:TEMP ('agent-docs-' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $download | Out-Null
+$zip = Join-Path $download "codex-agent-docs-$version.zip"
+Invoke-WebRequest "$base/codex-agent-docs-$version.zip" -OutFile $zip
+Invoke-WebRequest "$base/SHA256SUMS.txt" -OutFile (Join-Path $download 'SHA256SUMS.txt')
+$line = Get-Content (Join-Path $download 'SHA256SUMS.txt') | Where-Object { $_.EndsWith("  codex-agent-docs-$version.zip") }
+if (@($line).Count -ne 1) { throw '校验清单缺少唯一的 Codex ZIP 条目' }
+$expected = ($line -split '  ', 2)[0]
+if ((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { throw '安装包校验失败' }
+$unpacked = Join-Path $download 'unpacked'
+Expand-Archive -LiteralPath $zip -DestinationPath $unpacked
+& (Join-Path $unpacked 'install-codex.ps1')
+if (-not $?) { throw '插件登记失败' }
+```
+
+脚本会备份并更新 `~/.agent-docs/plugins/codex-agent-docs`，保留个人市场的其他插件与现有用户规则。它只登记插件来源；还需执行安装。支持 `codex plugin` 的版本可继续运行：
+
+```powershell
+codex plugin add codex-agent-docs@personal-local --json
+codex plugin list --marketplace personal-local --json
+```
+
+若命令不可用，重启 Codex 桌面应用，在插件目录选择 `personal-local`，安装或更新 `codex-agent-docs`。安装后重启桌面应用并新建聊天；如提示 Review hooks，在 Settings > Hooks 审阅并信任 Agent Docs Stop Hook。不要同时添加重复的用户 Stop Hook。插件安装完成与桌面模型自动维护通过是两项独立验收。
+
+以上市场及安装命令依据 [官方插件文档](https://developers.openai.com/plugins/build/plugins) 和 [插件管理命令](https://learn.chatgpt.com/docs/developer-commands)。已有机器升级不会覆盖用户规则；若要应用新版默认规则，请先比较并备份后替换。
+
+## 下载和本地打包
+
+完整安装包、独立 DSH/Codex 包及校验和见 [v0.1.3 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.3)。执行 `npm run pack` 会在 `dist/` 和项目根目录同时生成当前版本安装包；包文件均由 Git 忽略，通过 GitHub Release 分发。

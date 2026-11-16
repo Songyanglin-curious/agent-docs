@@ -1,6 +1,6 @@
 {
   "name": "codex-agent-docs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "为当前 Codex Agent 提供项目 Docs 初始化与轮次结束维护检查",
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json"
