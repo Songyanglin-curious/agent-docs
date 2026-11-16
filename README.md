@@ -1,6 +1,8 @@
 # Agent Docs
 
-为 AI Agent 提供项目文档维护。两个独立插件：`dsh-agent-docs` 和 `codex-agent-docs`，没有独立 Agent、数据库或中央服务。
+为人和 AI 维护共用的持久上下文／共享记忆。两个独立插件：`dsh-agent-docs` 和 `codex-agent-docs`，没有独立 Agent、数据库或中央服务。
+
+0.1.5 默认只初始化 Project、Design、Rules、Knowledge 四个目录；待办、收集箱和环境问题按需使用单文件，优先更新已有主题。验证材料复用现有约定，无约定时使用项目根目录 `evidence/`，有材料时创建，不默认整目录忽略。索引逐层概括直接子级，Docs 内从根索引可达；AGENTS.md 只列重要外部入口，主题参考在主题中链接。稳定项目偏好可从多次纠正中主动提炼，冲突及扩大适用范围先确认。实现后对照当前要求或有效 Design 核验，不新增固定 Spec／任务清单流程。
 
 正常工作结束时，原生 Hook 让当前 Agent 读取 `maintain.md` 检查一次；无需维护时直接结束。初始化由用户明确发起，通过 DSH `agent_docs_rules` 的 `init` 模式或 Codex `init` 技能读取 `init.md`。
 
@@ -13,6 +15,8 @@
 详细说明见源码仓库 [文档入口](docs/index.md)。发行包中的 `安装与测试.md` 提供安装命令、桌面版 Hook 审阅和验收步骤。
 
 ## 从 GitHub 安装 DSH Web
+
+以下 GitHub 示例仍指向已发布的 0.1.4；本轮 0.1.5 仅本地打包，尚未发布或安装，本地使用方式见“下载和本地打包”。
 
 需要 Node.js 22+、已安装的 DSH 和可联网的 PowerShell。在 PowerShell 执行：
 
@@ -57,7 +61,15 @@ codex plugin list --marketplace personal-local --json
 
 ## 下载和本地打包
 
-完整安装包、独立 DSH/Codex 包及校验和见 [v0.1.4 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.4)。执行 `npm run pack` 会在 `dist/` 和项目根目录同时生成当前版本安装包；包文件均由 Git 忽略，通过 GitHub Release 分发。
+已发布旧版见 [v0.1.4 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.4)。当前本地版本为 **0.1.5**，执行 `npm run pack` 在 `dist/` 和项目根目录同时生成 `agent-docs-0.1.5-安装包.zip`、`dsh-agent-docs-0.1.5.tgz`、`codex-agent-docs-0.1.5.zip` 与 `SHA256SUMS.txt`，包文件均由 Git 忽略。
+
+本地 DSH 安装示例（本轮未执行）：
+
+```powershell
+dsh plugin --profile web add 'D:/mycode/agent-docs/dsh-agent-docs-0.1.5.tgz'
+```
+
+Codex 可解压 `codex-agent-docs-0.1.5.zip`，运行其中 `install-codex.ps1` 登记，再按安装手册完成插件安装和 Hook 审阅。**升级安装包不会覆盖既有用户规则**；要应用新版需定位实际规则目录，比较、备份后同步四份文件，或在临时验收中指定全新的规则目录。本次不自动同步本机规则、不迁移已有项目。
 
 ## 本机安装验证（2026-11-16）
 
