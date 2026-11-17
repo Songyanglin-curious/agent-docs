@@ -1,15 +1,13 @@
-param([string]$MarketplaceRoot = $PSScriptRoot)
+param([string]$MarketplaceRoot = $PSScriptRoot, [string]$UserRoot = $env:USERPROFILE)
 $ErrorActionPreference = 'Stop'
 # 将发行包登记到个人市场；不修改其他插件，不伪造 Hook 信任或缓存安装状态。
 $pluginSource = Join-Path $MarketplaceRoot 'plugins/codex-agent-docs'
 if (-not (Test-Path -LiteralPath (Join-Path $pluginSource '.codex-plugin/plugin.json'))) {
     throw '未找到插件。请从解压后的发行包执行此脚本，或用 -MarketplaceRoot 指定发行目录。'
 }
-$personalMarketDir = Join-Path $env:USERPROFILE '.agents/plugins'
+$personalMarketDir = Join-Path $UserRoot '.agents/plugins'
 $catalogPath = Join-Path $personalMarketDir 'marketplace.json'
-$destination = Join-Path $env:USERPROFILE '.agent-docs/plugins/codex-agent-docs'
-$stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
-if (Test-Path -LiteralPath $destination) { Copy-Item -LiteralPath $destination -Destination "$destination.backup-$stamp" -Recurse }
+$destination = Join-Path $UserRoot '.codex/plugins/local/codex-agent-docs'
 New-Item -ItemType Directory -Path $destination -Force | Out-Null
 Copy-Item -Path (Join-Path $pluginSource '*') -Destination $destination -Recurse -Force
 # Windows 的点号目录不是隐藏属性；额外校验插件清单确实复制成功。
@@ -17,7 +15,6 @@ if (-not (Test-Path -LiteralPath (Join-Path $destination '.codex-plugin/plugin.j
 New-Item -ItemType Directory -Path $personalMarketDir -Force | Out-Null
 if (Test-Path -LiteralPath $catalogPath) {
     $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
-    Copy-Item -LiteralPath $catalogPath -Destination "$catalogPath.backup-$stamp"
 } else {
     $catalog = [pscustomobject]@{ name = 'personal-local'; plugins = @() }
 }
@@ -26,7 +23,7 @@ $otherPlugins = @($catalog.plugins | Where-Object { $_.name -ne 'codex-agent-doc
 # 个人市场根为用户主目录，source.path 按根目录解析。
 $entry = [pscustomobject]@{
     name = 'codex-agent-docs'
-    source = @{ source = 'local'; path = './.agent-docs/plugins/codex-agent-docs' }
+    source = @{ source = 'local'; path = './.codex/plugins/local/codex-agent-docs' }
     policy = @{ installation = 'AVAILABLE'; authentication = 'ON_INSTALL' }
     category = 'Productivity'
 }

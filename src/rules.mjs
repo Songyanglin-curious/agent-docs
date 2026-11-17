@@ -1,5 +1,4 @@
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { isAbsolute, join, resolve } from 'node:path';
 
 /** 判断当前工作目录是否已经具有 Docs 入口，不向上猜测其他项目。 */
@@ -8,20 +7,22 @@ export function hasDocs(cwd) {
   try { return statSync(join(cwd, 'docs', 'index.md')).isFile(); } catch { return false; }
 }
 
-/** 定位规则目录；显式目录必须是绝对路径，避免随项目切换而漂移。 */
+/** 仅解析显式自定义目录；未配置返回 undefined，由调用方直接使用包内默认规则。 */
 export function rulesDirectory(platform, explicit, env = process.env) {
   const configured = explicit || env.AGENT_DOCS_RULES_DIR;
   if (configured) {
     if (!isAbsolute(configured)) throw new Error('rulesDir 必须为绝对路径');
     return resolve(configured);
   }
-  return join(homedir(), '.agent-docs', platform);
+  return undefined;
 }
 
-/** 以独占创建保留用户规则；每次检查可读性，失败时仅回退随包默认文件。 */
+/** 默认只读包内规则；显式自定义时独占创建缺失文件，保留用户内容，失败回退包内文件。 */
 export function resolveRule(defaultsDir, rulesDir, mode, warn = () => {}) {
   if (!['init', 'maintain'].includes(mode)) throw new Error('未知规则类型');
   const fallback = join(defaultsDir, `${mode}.md`);
+  // 默认读取安装包内规则，仅显式指定目录时创建自定义副本。
+  if (!rulesDir) { readFileSync(fallback, 'utf8'); return fallback; }
   const target = join(rulesDir, `${mode}.md`);
   try {
     mkdirSync(rulesDir, { recursive: true });

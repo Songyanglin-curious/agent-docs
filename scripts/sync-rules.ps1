@@ -1,6 +1,7 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string]$TargetRoot = (Join-Path $env:USERPROFILE '.agent-docs'),
+    [Parameter(Mandatory)]
+    [string]$TargetRoot,
     [ValidateSet('dsh', 'codex')]
     [string[]]$Platform = @('dsh', 'codex')
 )

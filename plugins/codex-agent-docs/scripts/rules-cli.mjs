@@ -7,7 +7,7 @@ function main() {
   const rulesDir = rulesDirectory('codex');
   const defaultsDir = fileURLToPath(new URL('../defaults/', import.meta.url));
   if (mode === 'info') {
-    console.log(JSON.stringify({ rulesDir, init: resolveRule(defaultsDir, rulesDir, 'init'), maintain: resolveRule(defaultsDir, rulesDir, 'maintain') }));
+    console.log(JSON.stringify({ rulesDir: rulesDir || defaultsDir, init: resolveRule(defaultsDir, rulesDir, 'init'), maintain: resolveRule(defaultsDir, rulesDir, 'maintain') }));
   } else {
     const path = resolveRule(defaultsDir, rulesDir, mode);
     console.log(JSON.stringify({ path, instruction: ruleInstruction(mode, path) }));

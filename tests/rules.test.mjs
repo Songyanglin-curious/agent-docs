@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { hasDocs, resolveRule, rulesDirectory } from '../src/rules.mjs';
@@ -15,7 +15,17 @@ function fixture() {
   return { root, defaults, user: join(root, 'user') };
 }
 
-test('缺失时创建规则，自定义与默认升级后均不覆盖用户文件', () => {
+test('默认读取包内规则且随包更新，不创建用户规则目录', () => {
+  const f = fixture();
+  assert.equal(rulesDirectory('dsh', undefined, {}), undefined);
+  assert.equal(rulesDirectory('codex', undefined, {}), undefined);
+  assert.equal(resolveRule(f.defaults, undefined, 'maintain'), join(f.defaults, 'maintain.md'));
+  writeFileSync(join(f.defaults, 'maintain.md'), '升级的默认规则');
+  assert.equal(readFileSync(resolveRule(f.defaults, undefined, 'maintain'), 'utf8'), '升级的默认规则');
+  assert.equal(existsSync(f.user), false);
+});
+
+test('显式自定义目录缺失时创建规则，升级不覆盖用户文件', () => {
   const f = fixture();
   const path = resolveRule(f.defaults, f.user, 'maintain');
   assert.equal(readFileSync(path, 'utf8'), '默认维护');

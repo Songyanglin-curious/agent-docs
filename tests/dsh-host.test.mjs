@@ -14,6 +14,26 @@ import Agents from '@deepseek-ai/dsh-agent';
 
 const plugin = await import(process.env.AGENT_DOCS_DSH_ENTRY ? pathToFileURL(process.env.AGENT_DOCS_DSH_ENTRY).href : '../plugins/dsh-agent-docs/lib/index.mjs');
 
+test('DSH 默认 info 和维护指令均指向包内规则', async () => {
+  const ctx = new Context();
+  const previous = process.env.AGENT_DOCS_RULES_DIR;
+  delete process.env.AGENT_DOCS_RULES_DIR;
+  try {
+    for (const service of [LlmRuntime, SessionStore, SessionProjections, SystemPrompt, Tools, Agents]) await ctx.plugin(service);
+    await ctx.plugin(plugin, {});
+    const tool = ctx.tools.get('agent_docs_rules');
+    const info = await tool.execute({ mode: 'info' }, { signal: new AbortController().signal });
+    assert.match(info.rulesDir.replaceAll('\\', '/'), /\/defaults\/$/);
+    assert.equal(info.init, join(info.rulesDir, 'init.md'));
+    const result = await tool.execute({ mode: 'maintain' }, { signal: new AbortController().signal });
+    assert.equal(result.path, info.maintain);
+    assert.ok(result.instruction.includes('maintain.md'));
+  } finally {
+    if (previous === undefined) delete process.env.AGENT_DOCS_RULES_DIR; else process.env.AGENT_DOCS_RULES_DIR = previous;
+    await ctx.fiber.dispose();
+  }
+});
+
 test('真实 Cordis 依赖注入、事件投递、工具执行、卸载与重新激活', async () => {
   const cwd = mkdtempSync(join(tmpdir(), 'agent-docs-host-'));
   mkdirSync(join(cwd, 'docs'));

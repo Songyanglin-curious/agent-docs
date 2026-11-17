@@ -9,7 +9,7 @@ $zipPath = Join-Path $Dist "codex-agent-docs-$codexVersion.zip"
 $zip = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
 try {
     $entries = @($zip.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
-    foreach ($required in @('plugins/codex-agent-docs/.codex-plugin/plugin.json', 'plugins/codex-agent-docs/hooks/hooks.json', 'plugins/codex-agent-docs/scripts/rules.mjs', 'plugins/codex-agent-docs/defaults/init.md', 'plugins/codex-agent-docs/defaults/maintain.md', '.agents/plugins/marketplace.json', 'install-codex.ps1')) {
+    foreach ($required in @('plugins/codex-agent-docs/.codex-plugin/plugin.json', 'plugins/codex-agent-docs/hooks/hooks.json', 'plugins/codex-agent-docs/scripts/rules.mjs', 'plugins/codex-agent-docs/defaults/init.md', 'plugins/codex-agent-docs/defaults/maintain.md', '.agents/plugins/marketplace.json', 'install-codex.ps1', 'uninstall-codex.ps1')) {
         if ($entries -notcontains $required) { throw "ZIP 缺少 $required" }
     }
 } finally { $zip.Dispose() }

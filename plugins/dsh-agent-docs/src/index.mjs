@@ -8,7 +8,7 @@ export const name = 'agent-docs';
 export const inject = ['agents', 'tools'];
 export const Config = Schema.object({
   enabled: Schema.boolean().default(true).description('启用轮次结束时的 Docs 检查。'),
-  rulesDir: Schema.string().description('可编辑规则目录的绝对路径；留空使用用户目录。'),
+  rulesDir: Schema.string().description('显式自定义规则目录的绝对路径；留空直接读取插件包内 defaults，不创建用户副本。'),
 });
 
 /** 注册原生轮次 Hook 和规则入口，状态按 Agent 弱引用管理并随插件卸载释放。 */
@@ -37,7 +37,7 @@ export function apply(ctx, config = {}) {
     async execute(args, exec) {
       exec.signal?.throwIfAborted();
       if (!active) throw new Error('Agent Docs 已卸载');
-      if (args.mode === 'info') return { rulesDir: rulesDirectory('dsh', config.rulesDir), init: locate('init'), maintain: locate('maintain') };
+      if (args.mode === 'info') return { rulesDir: rulesDirectory('dsh', config.rulesDir) || defaultsDir, init: locate('init'), maintain: locate('maintain') };
       const path = locate(args.mode);
       if (exec.agent) checked.set(exec.agent, ctx.agents.turnBoundaryOf(exec.agent.session).lastTurn);
       return { path, instruction: ruleInstruction(args.mode, path) };

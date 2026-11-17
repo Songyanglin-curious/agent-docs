@@ -32,6 +32,7 @@ function pack() {
       policy: { installation: 'AVAILABLE', authentication: 'ON_INSTALL' }, category: 'Productivity' }],
   }, null, 2));
   cpSync(join(root, 'scripts', 'install-codex.ps1'), join(marketplace, 'install-codex.ps1'));
+  cpSync(join(root, 'scripts', 'uninstall-codex.ps1'), join(marketplace, 'uninstall-codex.ps1'));
   for (const file of ['安装与测试.md', '开发与验证.md']) {
     cpSync(join(root, 'docs', file), join(marketplace, file));
     cpSync(join(root, 'docs', file), join(dist, file));

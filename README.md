@@ -1,76 +1,75 @@
 # Agent Docs
 
-为人和 AI 维护共用的持久上下文／共享记忆。两个独立插件：`dsh-agent-docs` 和 `codex-agent-docs`，没有独立 Agent、数据库或中央服务。
+为人和 AI 维护共用的持久上下文。包含独立 DSH、Codex 插件；没有第二个 Agent、数据库或中央服务。
 
-0.1.5 默认只初始化 Project、Design、Rules、Knowledge 四个目录；待办、收集箱和环境问题按需使用单文件，优先更新已有主题。验证材料复用现有约定，无约定时使用项目根目录 `evidence/`，有材料时创建，不默认整目录忽略。索引逐层概括直接子级，Docs 内从根索引可达；AGENTS.md 只列重要外部入口，主题参考在主题中链接。稳定项目偏好可从多次纠正中主动提炼，冲突及扩大适用范围先确认。实现后对照当前要求或有效 Design 核验，不新增固定 Spec／任务清单流程。
+当前本地版 **0.1.6**：默认直接读取各自安装包的 `defaults/`，升级插件即更新默认规则，不创建 `~/.agent-docs`，不自动产生规则备份。仅显式配置 DSH `rulesDir` 或 `AGENT_DOCS_RULES_DIR` 时使用自定义目录；显式自定义文件不被升级覆盖。
 
-正常工作结束时，原生 Hook 让当前 Agent 读取 `maintain.md` 检查一次；无需维护时直接结束。初始化由用户明确发起，通过 DSH `agent_docs_rules` 的 `init` 模式或 Codex `init` 技能读取 `init.md`。
+Docs 默认四核心目录：Project、Design、Rules、Knowledge。待办、收集箱、环境问题优先更新已有主题，必要时使用单文件。原始验证材料优先复用现有约定，否则使用项目根目录 `evidence/`。索引逐层概括直接子级并保证可达。详见 [文档入口](docs/index.md)。
 
-用户规则默认位于 `~/.agent-docs/dsh` 或 `~/.agent-docs/codex`；DSH 可设置 `rulesDir`，两端也都支持环境变量 `AGENT_DOCS_RULES_DIR` 指向同一个绝对目录。用户文件只在缺失时创建，升级不覆盖，修改后下次读取生效。
+## 打包
 
-规则源为 `rules/` 下四份文件：`principles.md`（组织原则）、`spec.md`（内容规格）、`init.md`（初始化操作）、`maintain.md`（日常维护）。发行包包含全部四份，首次调用自动补齐缺失的原则与规格文件。已有用户规则不会被升级覆盖，更新已有机器时请主动比较并选择替换。
-
-开发：Node.js 22+，`npm run build`、`npm test`、`npm run pack`。无需下载构建依赖。DSH 使用宿主已有的 peer 服务；离线包不包含整个 DSH 运行环境。
-
-详细说明见源码仓库 [文档入口](docs/index.md)。发行包中的 `安装与测试.md` 提供安装命令、桌面版 Hook 审阅和验收步骤。
-
-## 从 GitHub 安装 DSH Web
-
-以下命令使用 v0.1.5 Release 安装包；本轮发布不自动更新本机插件或已有用户规则。
-
-需要 Node.js 22+、已安装的 DSH 和可联网的 PowerShell。在 PowerShell 执行：
+Node.js 22+，PowerShell 7 的 pwsh、tar 在 PATH 中：
 
 ```powershell
-dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.5/dsh-agent-docs-0.1.5.tgz'
+npm test
+npm run pack
+npm run verify:packages
 ```
 
-安装后重启对应 DSH Web 实例；Profile 不是 web 时替换名称。不要添加 `--offline`。插件工具应包含 `agent_docs_rules`。初始化时明确说“用 Agent Docs 初始化当前项目 Docs”。
+根目录与 dist 同时生成完整安装包 `agent-docs-0.1.6-安装包.zip`、独立 TGZ、Codex ZIP 及 SHA256SUMS.txt。包文件不入源码 Git。
 
-## 从 GitHub 安装 Codex 桌面插件
-
-在 PowerShell 下载固定版本 ZIP，验证 GitHub 校验和，解压并运行登记脚本：
+## DSH web 本地安装与卸载
 
 ```powershell
-$version = '0.1.5'
-$base = "https://github.com/Songyanglin-curious/agent-docs/releases/download/v$version"
-$download = Join-Path $env:TEMP ('agent-docs-' + [guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $download | Out-Null
-$zip = Join-Path $download "codex-agent-docs-$version.zip"
-Invoke-WebRequest "$base/codex-agent-docs-$version.zip" -OutFile $zip
-Invoke-WebRequest "$base/SHA256SUMS.txt" -OutFile (Join-Path $download 'SHA256SUMS.txt')
-$line = Get-Content (Join-Path $download 'SHA256SUMS.txt') | Where-Object { $_.EndsWith("  codex-agent-docs-$version.zip") }
-if (@($line).Count -ne 1) { throw '校验清单缺少唯一的 Codex ZIP 条目' }
-$expected = ($line -split '  ', 2)[0]
-if ((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { throw '安装包校验失败' }
-$unpacked = Join-Path $download 'unpacked'
-Expand-Archive -LiteralPath $zip -DestinationPath $unpacked
-& (Join-Path $unpacked 'install-codex.ps1')
-if (-not $?) { throw '插件登记失败' }
+dsh plugin --profile web add 'D:/mycode/agent-docs/dsh-agent-docs-0.1.6.tgz'
 ```
 
-脚本会备份并更新 `~/.agent-docs/plugins/codex-agent-docs`，保留个人市场的其他插件与现有用户规则。它只登记插件来源；还需执行安装。支持 `codex plugin` 的版本可继续运行：
+插件由 DSH Profile 管理。重启 DSH Web 后调用 `agent_docs_rules` 的 info 模式，init、maintain 应指向已安装包的 defaults，不是用户目录。只有明确要求初始化时才使用 init。
+
+卸载：
+
+```powershell
+dsh plugin --profile web remove dsh-agent-docs
+```
+
+原生包管理器可能保留其共享依赖缓存；插件不额外创建独立规则或备份目录。
+
+## Codex 本地安装与完整卸载
+
+1. 将 `codex-agent-docs-0.1.6.zip` 解压到临时目录，保留点号目录。
+2. 在 PowerShell 执行解压目录的 `install-codex.ps1`。它只将源放在 `~/.codex/plugins/local/codex-agent-docs`，增量登记宿主支持的个人市场 `~/.agents/plugins/marketplace.json`，保留其他条目，不生成备份。
+3. 执行：
 
 ```powershell
 codex plugin add codex-agent-docs@personal-local --json
 codex plugin list --marketplace personal-local --json
 ```
 
-若命令不可用，重启 Codex 桌面应用，在插件目录选择 `personal-local`，安装或更新 `codex-agent-docs`。安装后重启桌面应用并新建聊天；如提示 Review hooks，在 Settings > Hooks 审阅并信任 Agent Docs Stop Hook。不要同时添加重复的用户 Stop Hook。插件安装完成与桌面模型自动维护通过是两项独立验收。
+Codex 自己管理安装缓存。若命令不可用，可在桌面插件目录选择 personal-local 安装。重启桌面应用，新建聊天；如提示审阅 Hook，核对命令后信任，不伪造信任记录。
 
-以上市场及安装命令依据 [官方插件文档](https://developers.openai.com/plugins/build/plugins) 和 [插件管理命令](https://learn.chatgpt.com/docs/developer-commands)。已有机器升级不会覆盖用户规则；若要应用新版默认规则，请先比较并备份后替换。
-
-## 下载和本地打包
-
-当前版本发布页见 [v0.1.5 发布页](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.5)。当前本地版本为 **0.1.5**，执行 `npm run pack` 在 `dist/` 和项目根目录同时生成 `agent-docs-0.1.5-安装包.zip`、`dsh-agent-docs-0.1.5.tgz`、`codex-agent-docs-0.1.5.zip` 与 `SHA256SUMS.txt`，包文件均由 Git 忽略。
-
-本地 DSH 安装示例（本轮未执行）：
+查看实际规则：
 
 ```powershell
-dsh plugin --profile web add 'D:/mycode/agent-docs/dsh-agent-docs-0.1.5.tgz'
+node "$env:USERPROFILE/.codex/plugins/local/codex-agent-docs/scripts/rules-cli.mjs" info
 ```
 
-Codex 可解压 `codex-agent-docs-0.1.5.zip`，运行其中 `install-codex.ps1` 登记，再按安装手册完成插件安装和 Hook 审阅。**升级安装包不会覆盖既有用户规则**；要应用新版需定位实际规则目录，比较、备份后同步四份文件，或在临时验收中指定全新的规则目录。本次不自动同步本机规则、不迁移已有项目。
+完整卸载先执行原生卸载，再运行解压目录中的清理脚本：
 
-## 本机安装验证（2026-11-16）
+```powershell
+codex plugin remove codex-agent-docs@personal-local --json
+& '<解压目录>/uninstall-codex.ps1'
+```
 
-已按上述 GitHub 命令安装 0.1.4：DSH web 的依赖指向固定 Release URL，Codex 回读为 `version=0.1.4`、`installed=true`、`enabled=true`。已安装 DSH 包的真实 Cordis 工具与生命周期测试通过，已安装 Codex Hook 的子进程验证首次提醒、续接放行通过。两端包内四份规则与源码哈希一致。全量测试 12 项通过、1 项原有模型闭环用例跳过。重启 DSH Web 和 Codex 桌面应用后使用新版；桌面正常聊天的自动维护闭环仍需验收。
+清理脚本仅移除本插件本地源和市场条目。共享市场文件及其他插件保留；显式自定义规则不自动删除。不再创建用户主目录 `.agent-docs`。
+
+## GitHub 包
+
+本轮 0.1.6 仅本地打包，尚未发布。旧 [v0.1.5 Release](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.5) 仍使用旧规则副本机制，不应拿来验证本次修复。后续发布后用新版本 TGZ 地址执行 DSH 安装；Codex 下载新 ZIP 与 SHA256SUMS.txt，校验后解压，执行上述安装步骤。不要使用源码 ZIP 代替发行包。
+
+## 自定义规则（可选）
+
+通常无需配置。需要修改规则时，在当前 Agent 自有目录内选一个明确位置，如 DSH 的 `.dsh/agent-docs/rules` 或 Codex 的 `.codex/agent-docs/rules`，由用户显式设置绝对路径。两端共享也必须显式指定同一目录；Windows、WSL 不自动共享。
+
+普通升级不再需要手动同步规则。开发同步脚本只用于明确选择的自定义目录，必须传入 TargetRoot；它按显式同步操作保留备份，不是插件运行流程，不会在本轮自动调用。
+
+安装与路径验证不代表真实模型完成了初始化和自动维护，完整验收步骤见 [安装与测试](docs/安装与测试.md)。
