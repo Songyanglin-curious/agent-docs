@@ -2,7 +2,7 @@
 
 为人和 AI 维护共用的持久上下文。包含独立 DSH、Codex 插件；没有第二个 Agent、数据库或中央服务。
 
-当前版本 **0.1.6**：默认直接读取各自安装包的 `defaults/`，升级插件即更新默认规则，不创建 `~/.agent-docs`，不自动产生规则备份。仅显式配置 DSH `rulesDir` 或 `AGENT_DOCS_RULES_DIR` 时使用自定义目录；显式自定义文件不被升级覆盖。
+当前版本 **0.1.7**：更新 Project 当前系统映射的建立、维护和验收规则，以主要能力及其实际行为为主线，补齐调查底稿、覆盖核对和维护影响分析。独立三场景语义验收尚未完成。默认直接读取各自安装包的 `defaults/`，升级插件即更新默认规则，不创建 `~/.agent-docs`，不自动产生规则备份。仅显式配置 DSH `rulesDir` 或 `AGENT_DOCS_RULES_DIR` 时使用自定义目录；显式自定义文件不被升级覆盖。
 
 Docs 默认四核心目录：Project、Design、Rules、Knowledge。待办、收集箱、环境问题优先更新已有主题，必要时使用单文件。原始验证材料优先复用现有约定，否则使用项目根目录 `evidence/`。索引逐层概括直接子级并保证可达。详见 [文档入口](docs/index.md)。
 
@@ -16,12 +16,12 @@ npm run pack
 npm run verify:packages
 ```
 
-根目录与 dist 同时生成完整安装包 `agent-docs-0.1.6-安装包.zip`、独立 TGZ、Codex ZIP 及 SHA256SUMS.txt。包文件不入源码 Git。
+根目录与 dist 同时生成完整安装包 `agent-docs-0.1.7-安装包.zip`、独立 TGZ、Codex ZIP 及 SHA256SUMS.txt。包文件不入源码 Git。
 
 ## DSH web 本地安装与卸载
 
 ```powershell
-dsh plugin --profile web add 'D:/mycode/agent-docs/dsh-agent-docs-0.1.6.tgz'
+dsh plugin --profile web add 'D:/mycode/agent-docs/dsh-agent-docs-0.1.7.tgz'
 ```
 
 插件由 DSH Profile 管理。重启 DSH Web 后调用 `agent_docs_rules` 的 info 模式，init、maintain 应指向已安装包的 defaults，不是用户目录。只有明确要求初始化时才使用 init。
@@ -36,7 +36,7 @@ dsh plugin --profile web remove dsh-agent-docs
 
 ## Codex 本地安装与完整卸载
 
-1. 将 `codex-agent-docs-0.1.6.zip` 解压到临时目录，保留点号目录。
+1. 将 `codex-agent-docs-0.1.7.zip` 解压到临时目录，保留点号目录。
 2. 在 PowerShell 执行解压目录的 `install-codex.ps1`。它只将源放在 `~/.codex/plugins/local/codex-agent-docs`，增量登记宿主支持的个人市场 `~/.agents/plugins/marketplace.json`，保留其他条目，不生成备份。
 3. 执行：
 
@@ -64,25 +64,25 @@ codex plugin remove codex-agent-docs@personal-local --json
 
 ## GitHub 包
 
-[v0.1.6 Release](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.6) 提供 DSH TGZ、Codex ZIP、完整安装包 `agent-docs-0.1.6-bundle.zip` 与 SHA256SUMS.txt。不要使用源码 ZIP 代替发行包。
+[v0.1.7 Release](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.7) 提供 DSH TGZ、Codex ZIP、完整安装包 `agent-docs-0.1.7-bundle.zip` 与 SHA256SUMS.txt。完整安装包与本地 `agent-docs-0.1.7-安装包.zip` 内容一致，使用英文附件名便于命令行下载。不要使用源码 ZIP 代替发行包。
 
 DSH web 从 GitHub 安装：
 
 ```powershell
-dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.6/dsh-agent-docs-0.1.6.tgz'
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.7/dsh-agent-docs-0.1.7.tgz'
 ```
 
 Codex 从 GitHub 下载并校验后安装（PowerShell）：
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$base = 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.6'
-$download = Join-Path $env:TEMP ('agent-docs-016-' + [guid]::NewGuid().ToString('N'))
+$base = 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.7'
+$download = Join-Path $env:TEMP ('agent-docs-017-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $download | Out-Null
-$zip = Join-Path $download 'codex-agent-docs-0.1.6.zip'
-Invoke-WebRequest "$base/codex-agent-docs-0.1.6.zip" -OutFile $zip
+$zip = Join-Path $download 'codex-agent-docs-0.1.7.zip'
+Invoke-WebRequest "$base/codex-agent-docs-0.1.7.zip" -OutFile $zip
 Invoke-WebRequest "$base/SHA256SUMS.txt" -OutFile (Join-Path $download 'SHA256SUMS.txt')
-$line = @(Get-Content (Join-Path $download 'SHA256SUMS.txt') | Where-Object { $_.EndsWith('  codex-agent-docs-0.1.6.zip') })
+$line = @(Get-Content (Join-Path $download 'SHA256SUMS.txt') | Where-Object { $_.EndsWith('  codex-agent-docs-0.1.7.zip') })
 if ($line.Count -ne 1) { throw '校验清单缺少唯一的 Codex ZIP 条目' }
 if ((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne ($line[0] -split '  ', 2)[0]) { throw '安装包校验失败' }
 $unpacked = Join-Path $download 'unpacked'
