@@ -18,10 +18,10 @@ npm run verify:packages
 
 根目录与 dist 同时生成完整安装包 `agent-docs-0.1.7-安装包.zip`、独立 TGZ、Codex ZIP 及 SHA256SUMS.txt。包文件不入源码 Git。
 
-## DSH web 本地安装与卸载
+## DSH web 安装与卸载
 
 ```powershell
-dsh plugin --profile web add 'D:/mycode/agent-docs/dsh-agent-docs-0.1.7.tgz'
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.7/dsh-agent-docs-0.1.7.tgz'
 ```
 
 插件由 DSH Profile 管理。重启 DSH Web 后调用 `agent_docs_rules` 的 info 模式，init、maintain 应指向已安装包的 defaults，不是用户目录。只有明确要求初始化时才使用 init。
@@ -65,12 +65,6 @@ codex plugin remove codex-agent-docs@personal-local --json
 ## GitHub 包
 
 [v0.1.7 Release](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.7) 提供 DSH TGZ、Codex ZIP、完整安装包 `agent-docs-0.1.7-bundle.zip` 与 SHA256SUMS.txt。完整安装包与本地 `agent-docs-0.1.7-安装包.zip` 内容一致，使用英文附件名便于命令行下载。不要使用源码 ZIP 代替发行包。
-
-DSH web 从 GitHub 安装：
-
-```powershell
-dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.7/dsh-agent-docs-0.1.7.tgz'
-```
 
 Codex 从 GitHub 下载并校验后安装（PowerShell）：
 
