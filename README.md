@@ -2,7 +2,7 @@
 
 为人和 AI 维护共用的持久上下文。包含独立 DSH、Codex 插件；没有第二个 Agent、数据库或中央服务。
 
-当前本地版 **0.1.6**：默认直接读取各自安装包的 `defaults/`，升级插件即更新默认规则，不创建 `~/.agent-docs`，不自动产生规则备份。仅显式配置 DSH `rulesDir` 或 `AGENT_DOCS_RULES_DIR` 时使用自定义目录；显式自定义文件不被升级覆盖。
+当前版本 **0.1.6**：默认直接读取各自安装包的 `defaults/`，升级插件即更新默认规则，不创建 `~/.agent-docs`，不自动产生规则备份。仅显式配置 DSH `rulesDir` 或 `AGENT_DOCS_RULES_DIR` 时使用自定义目录；显式自定义文件不被升级覆盖。
 
 Docs 默认四核心目录：Project、Design、Rules、Knowledge。待办、收集箱、环境问题优先更新已有主题，必要时使用单文件。原始验证材料优先复用现有约定，否则使用项目根目录 `evidence/`。索引逐层概括直接子级并保证可达。详见 [文档入口](docs/index.md)。
 
@@ -64,7 +64,36 @@ codex plugin remove codex-agent-docs@personal-local --json
 
 ## GitHub 包
 
-本轮 0.1.6 仅本地打包，尚未发布。旧 [v0.1.5 Release](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.5) 仍使用旧规则副本机制，不应拿来验证本次修复。后续发布后用新版本 TGZ 地址执行 DSH 安装；Codex 下载新 ZIP 与 SHA256SUMS.txt，校验后解压，执行上述安装步骤。不要使用源码 ZIP 代替发行包。
+[v0.1.6 Release](https://github.com/Songyanglin-curious/agent-docs/releases/tag/v0.1.6) 提供 DSH TGZ、Codex ZIP、完整安装包 `agent-docs-0.1.6-bundle.zip` 与 SHA256SUMS.txt。不要使用源码 ZIP 代替发行包。
+
+DSH web 从 GitHub 安装：
+
+```powershell
+dsh plugin --profile web add 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.6/dsh-agent-docs-0.1.6.tgz'
+```
+
+Codex 从 GitHub 下载并校验后安装（PowerShell）：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$base = 'https://github.com/Songyanglin-curious/agent-docs/releases/download/v0.1.6'
+$download = Join-Path $env:TEMP ('agent-docs-016-' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $download | Out-Null
+$zip = Join-Path $download 'codex-agent-docs-0.1.6.zip'
+Invoke-WebRequest "$base/codex-agent-docs-0.1.6.zip" -OutFile $zip
+Invoke-WebRequest "$base/SHA256SUMS.txt" -OutFile (Join-Path $download 'SHA256SUMS.txt')
+$line = @(Get-Content (Join-Path $download 'SHA256SUMS.txt') | Where-Object { $_.EndsWith('  codex-agent-docs-0.1.6.zip') })
+if ($line.Count -ne 1) { throw '校验清单缺少唯一的 Codex ZIP 条目' }
+if ((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne ($line[0] -split '  ', 2)[0]) { throw '安装包校验失败' }
+$unpacked = Join-Path $download 'unpacked'
+Expand-Archive -LiteralPath $zip -DestinationPath $unpacked
+& (Join-Path $unpacked 'install-codex.ps1')
+if (-not $?) { throw '插件登记失败' }
+codex plugin add codex-agent-docs@personal-local --json
+if ($LASTEXITCODE -ne 0) { throw '插件安装失败' }
+```
+
+完整卸载仍使用上节的原生卸载与清理脚本。安装后重启对应宿主，按提示审阅 Hook。
 
 ## 自定义规则（可选）
 
